@@ -3,6 +3,8 @@ import pygame
 import pygame_menu
 import os
 
+from sprite import Player
+
 # Инициализация
 pygame.init()
 
@@ -64,23 +66,24 @@ def start_menu(theme = my_theme):
     menu.mainloop(window)
 
 def start_game():
-    py, sy, ay = HEIGHT // 2, 0, 0
-    player = pygame.Rect(WIDHT // 3, py, 111, 106)
-    lives = 3
+    all_sprites = pygame.sprite.Group()
+    player_group = pygame.sprite.Group()
+    player = Player(img_fin, WIDHT // 3, HEIGHT // 2, 111, 106, player_group, all_sprites)
+    
     scores = 0
-    frame = 0
-    state = 'start'
-    timer = 10
+    # frame = 0
+    # state = 'start'
+    # timer = 10
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()               
-        press = pygame.mouse.get_pressed()
-        keys = pygame.key.get_pressed()
-        click = keys[pygame.K_SPACE] or press[0]
+        # press = pygame.mouse.get_pressed()
+        # keys = pygame.key.get_pressed()
+        # click = keys[pygame.K_SPACE] or press[0]
 
-        if timer > 0:
-            timer -= 1
+        # if timer > 0:
+        #     timer -= 1
         # frame = (frame + 0.05) % 7
 
         for i in range(len(bgs) - 1, - 1, - 1):
@@ -91,11 +94,11 @@ def start_game():
             if bgs[len(bgs) - 1]. right <= WIDHT:
                 bgs.append(pygame.Rect(bgs[len(bgs) - 1]. right, 0, 600, 600))
                 
-        for i in range(len(pipes) - 1, - 1, - 1):
-            pipe = pipes[i]
-            pipe.x -= 3
-            if pipe.right < 0:
-                pipes.remove(pipe)
+        # for i in range(len(pipes) - 1, - 1, - 1):
+        #     pipe = pipes[i]
+        #     pipe.x -= 3
+        #     if pipe.right < 0:
+        #         pipes.remove(pipe)
 
         # if state == 'start':
         #     if click and timer == 0 and len(pipes) == 0:
@@ -131,27 +134,27 @@ def start_game():
         #     sy, ay = 0, 0
         #     state = 'start'
         #     timer = 60             
-                      
+        all_sprites.update()             
 
         for bg in bgs:
             window.blit(img_bg, bg)
 
-        for pipe in pipes:
-            if pipe.y == 0:
-                rect = img_pipes_top.get_rect(bottomleft = pipe.bottomleft)
-                window.blit(img_pipes_top, rect)
-            else:
-                rect = img_pipes_bottom.get_rect(topleft = pipe.topleft)
-                window.blit(img_pipes_bottom, rect)
+        # for pipe in pipes:
+        #     if pipe.y == 0:
+        #         rect = img_pipes_top.get_rect(bottomleft = pipe.bottomleft)
+        #         window.blit(img_pipes_top, rect)
+        #     else:
+        #         rect = img_pipes_bottom.get_rect(topleft = pipe.topleft)
+        #         window.blit(img_pipes_bottom, rect)
             
-
+        all_sprites.draw(window)
         # fin = img_fin.subsurface(111 * int(frame) , 0, 111, 106)
         # window.blit(fin, player)
 
         text = font_35.render('Очки: ' + str(scores), 1, pygame.Color('black'))
         window.blit(text, (10, 10))
 
-        text = font_35.render('Жизни: ' + str(lives), 1, pygame.Color('black'))
+        text = font_35.render('Жизни: ' + str(player.life), 1, pygame.Color('black'))
         window.blit(text, (10, HEIGHT - 30))
 
         pygame.display.update()
