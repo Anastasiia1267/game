@@ -2,12 +2,13 @@ import sys
 import pygame
 import pygame_menu
 import os
+from random import randint
+from sprite import Player,Pipes
 
-from sprite import Player
 
 # Инициализация
 pygame.init()
-
+# шифт отлетел да, вставляла обратно
 #  основные переменные и константы
 size = (WIDHT, HEIGHT) = (800, 600)
 FPS = 60
@@ -64,27 +65,22 @@ def start_menu(theme = my_theme):
     menu.add.button('Exit', pygame_menu.events.EXIT)
     # цикл меню
     menu.mainloop(window)
+    
 
+
+    
 def start_game():
     all_sprites = pygame.sprite.Group()
     player_group = pygame.sprite.Group()
+    pipe_group = pygame.sprite.Group()
     player = Player(img_fin, WIDHT // 3, HEIGHT // 2, 111, 106, player_group, all_sprites)
-    
+    pipes = [] 
     scores = 0
-    # frame = 0
-    # state = 'start'
-    # timer = 10
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 terminate()               
-        # press = pygame.mouse.get_pressed()
-        # keys = pygame.key.get_pressed()
-        # click = keys[pygame.K_SPACE] or press[0]
-
-        # if timer > 0:
-        #     timer -= 1
-        # frame = (frame + 0.05) % 7
+        scores += 1
 
         for i in range(len(bgs) - 1, - 1, - 1):
             bg = bgs[i]
@@ -92,74 +88,53 @@ def start_game():
             if bg.right < 0:
                 bgs.remove(bg)
             if bgs[len(bgs) - 1]. right <= WIDHT:
-                bgs.append(pygame.Rect(bgs[len(bgs) - 1]. right, 0, 600, 600))
-                
-        # for i in range(len(pipes) - 1, - 1, - 1):
-        #     pipe = pipes[i]
-        #     pipe.x -= 3
-        #     if pipe.right < 0:
-        #         pipes.remove(pipe)
+                bgs.append(pygame.Rect(bgs[len(bgs) - 1].right, 0, 600, 600))
 
-        # if state == 'start':
-        #     if click and timer == 0 and len(pipes) == 0:
-        #         state = 'play'
-        #     py += (HEIGHT // 2 - py) * 0.1
-        #     player.y = py
-        # elif state == 'play':
-        #     if click:
-        #         ay = -2
-        #     else:
-        #         ay = 0
-        #     if not(player.top < 0 or player.bottom > HEIGHT):
-        #         scores += 1
-
-        #     py += sy
-        #     sy = (sy + ay + 1) * 0.95
-        #     player.y = py
-
-        #     if len(pipes) == 0 or pipes[len(pipes) - 1].x < WIDHT - 200:
-        #         pipes.append(pygame.Rect(WIDHT, 0, 70, 140))
-        #         pipes.append(pygame.Rect(WIDHT, 420, 70, 220))
-
-        #     if player.top < 0 or player.bottom > HEIGHT:
-        #         state = 'fall'
-
-        #     for pipe in pipes:
-        #         if player.colliderect(pipe):                
-        #                 state = 'fall'
-        # elif state == 'fall':          
-        #     lives -= 1
-        #     if lives == 0:
-        #         start_menu() 
-        #     sy, ay = 0, 0
-        #     state = 'start'
-        #     timer = 60             
-        all_sprites.update()             
-
+        if len(pipes) == 0 or pipes[len(pipes) - 1].rect.x < WIDHT - 200:
+            pipes.append(Pipes(WIDHT+ randint(100, 250), 0,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))
+            pipes.append(Pipes(WIDHT + randint(20, 200), 500,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))          
+        player_group.update()
+        pipe_group.update(player, player_group)
+        
         for bg in bgs:
             window.blit(img_bg, bg)
-
-        # for pipe in pipes:
-        #     if pipe.y == 0:
-        #         rect = img_pipes_top.get_rect(bottomleft = pipe.bottomleft)
-        #         window.blit(img_pipes_top, rect)
-        #     else:
-        #         rect = img_pipes_bottom.get_rect(topleft = pipe.topleft)
-        #         window.blit(img_pipes_bottom, rect)
-            
+        if player.life == 0:
+            game_over(scores)
+      
         all_sprites.draw(window)
-        # fin = img_fin.subsurface(111 * int(frame) , 0, 111, 106)
-        # window.blit(fin, player)
-
         text = font_35.render('Очки: ' + str(scores), 1, pygame.Color('black'))
         window.blit(text, (10, 10))
-
         text = font_35.render('Жизни: ' + str(player.life), 1, pygame.Color('black'))
         window.blit(text, (10, HEIGHT - 30))
 
         pygame.display.update()
         clock.tick(FPS)
-
+img_game_over = pygame_menu.baseimage.BaseImage(
+    image_path='img/menu.png',
+    drawing_mode=pygame_menu.baseimage.IMAGE_MODE_REPEAT_XY,
+    drawing_offset = (0, 0)   
+)
+img_game_over.resize(WIDHT, HEIGHT)
+my_theme_game_over = pygame_menu.themes.Theme(
+    background_color=img_game_over,
+    widget_alignment=pygame_menu.locals.ALIGN_LEFT,
+    widget_background_color=(4, 21, 48),
+    title_background_color=(0, 0, 0),
+    widget_font=pygame_menu.font.FONT_FRANCHISE,
+    title_font=pygame_menu.font.FONT_FRANCHISE,
+    widget_font_size=50,
+    title_font_size=35,
+    widget_font_color=(255, 0, 0),
+    widget_margin=(20, 50),
+    widget_offset= (20, 300),
+    widget_padding=10,
+    title_bar_style=pygame_menu.widgets.MENUBAR_STYLE_NONE
+)
+def game_over(scores, theme = my_theme_game_over):
+    menu = pygame_menu.Menu("Game over \n Your scores: " + str(scores), width = WIDHT,height = HEIGHT, theme=theme)
+    menu.add.button('Back to game', start_game)
+    menu.add.button('Exit', pygame_menu.events.EXIT)
+    menu.mainloop(window)
 
 def terminate():
     """Выйти из игры"""
@@ -167,3 +142,4 @@ def terminate():
     sys.exit()
 
 start_menu()
+
