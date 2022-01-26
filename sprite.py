@@ -1,12 +1,13 @@
-from re import T
 import pygame
 
 # Инициализация
 pygame.init()
 
+# механика персонажа
 class Player(pygame.sprite.Sprite):
     def __init__(self,images, x, y, w, h,*group):
         super().__init__(*group)
+        # основные переменные и константы
         self.frame = 0
         self.images = images
         self.image = self.images.subsurface(111 * self.frame , 0, 111, 106)
@@ -21,6 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.y = y
         self.up = 0
 
+    #  движение игрока
     def move(self, click) :
         if self.start:
             if click and self.time_return == 0:
@@ -35,10 +37,10 @@ class Player(pygame.sprite.Sprite):
             self.gravity += self.up
             self.up = (self.up + self.speed  + 1) * 0.95
             self.rect.y = self.gravity
-        
         if self.rect.top < 0 or self.rect.bottom > (self.y * 2):
             self.fall()
-            
+
+    # В случае столкновения с трубами или границами экрана переход в loss_Of_Life     
     def fall(self):
         self.loss_Of_Life()
         self.speed = 0
@@ -46,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.time_return = 60
         self.start = True
 
+    #  обновление 
     def update(self):
         press = pygame.mouse.get_pressed()
         keys = pygame.key.get_pressed()
@@ -55,11 +58,12 @@ class Player(pygame.sprite.Sprite):
         self.move(click)
         if self.time_return > 0:
             self.time_return -= 1
-        
+    # В случае столкновения с трубами или границами экрана уменьшение жизней   
     def loss_Of_Life(self):
         if self.life:
             self.life -= 1
 
+# движение труб
 class Pipes(pygame.sprite.Sprite):
     def __init__(self, x, y, imges, *group):
         super().__init__(*group)
@@ -73,6 +77,7 @@ class Pipes(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y      
 
+    # обновление
     def update(self, target, group_target):
         self.rect.x -= 3
         if self.rect.right < 0:
