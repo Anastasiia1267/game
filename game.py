@@ -91,8 +91,8 @@ def start_game():
 
         # добавление труб
         if len(pipes) == 0 or pipes[len(pipes) - 1].rect.x < WIDHT - 200:
-            pipes.append(Pipes(WIDHT+ randint(100, 250), 0,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))
-            pipes.append(Pipes(WIDHT + randint(20, 200), 500,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))          
+            pipes.append(Pipes(WIDHT+ randint(250, 450), 0,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))
+            pipes.append(Pipes(WIDHT + randint(150, 350), 460,[img_pipes_bottom, img_pipes_top], pipe_group, all_sprites))          
         player_group.update()
         pipe_group.update(player, player_group)
 
